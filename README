@@ -1,0 +1,5 @@
+Yet another plugin for uploading files to the server using Django and JQuery.
+
+Based on jQuery-File-Upload written by Sebastian Tschan (https://github.com/blueimp/jQuery-File-Upload).
+
+The project is still in its infancy.
