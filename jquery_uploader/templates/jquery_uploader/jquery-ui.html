@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load static %}
-<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<link rel="stylesheet" href="{% get_static_prefix %}jquery_uploader/css/bootstrap.css">
+<!-- CSS to style the file input field as button and adjust the jQuery UI progress bars -->
+<link rel="stylesheet" href="{% get_static_prefix %}jquery_uploader/css/jquery-ui.css">
 
 
 <!-- The file upload form used as target for the file upload widget -->
@@ -10,27 +10,23 @@
     <div class="fileupload-buttonbar">
         <div>
             <!-- The fileinput-button span is used to style the file input field as button -->
-            <span class="btn btn-small btn-success fileinput-button">
-                <i class="icon-plus icon-white"></i>
-                <span>{% trans "Add files..." %}</span>
+            <span class="fileinput-button">
+                Add files...
                 <input type="file" name="files[]" multiple>
             </span>
-            <button type="submit" class="btn btn-small btn-primary start">
-                <i class="icon-upload icon-white"></i>
-                <span>{% trans "Start upload" %}</span>
+            <button type="submit" class="start">
+                Start upload
             </button>
-            <button type="reset" class="btn btn-small btn-warning cancel">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>{% trans "Cancel upload" %}</span>
+            <button type="reset" class="cancel">
+                Cancel upload
             </button>
-            <button type="button" class="btn btn-small btn-danger delete">
-                <i class="icon-trash icon-white"></i>
-                <span>{% trans "Delete" %}</span>
+            <button type="button" class="delete">
+                Delete
             </button>
             <input type="checkbox" class="toggle">
         </div>
         <!-- The global progress information -->
-        <div class="fileupload-progress">
+        <div class="fileupload-progress fade">
             <!-- The global progress bar -->
             <b>{% trans "Global Progress" %}</b>
             <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
@@ -44,7 +40,7 @@
     <div class="fileupload-loading"></div>
     <p><b>{% trans "Selected files for download" %}</b></p>
     <!-- The table listing the files available for upload/download -->
-    <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+    <table role="presentation"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
 </div>
 
 
@@ -52,35 +48,24 @@
 <script id="template-upload" type="text/x-tmpl">
 [% for (var i=0, file; file=o.files[i]; i++) { %]
     <tr class="template-upload fade">
-        <td class="preview">
-            <span class="fade"></span>
-        </td>
-        <td class="name">
-            [%=file.name%]
-            [% if (file.error) { %]
-                <div><span class="label label-important">Error</span> [%=file.error%]</div>
-            [% } %]
-        </td>
-        <td class="size">
-            <p>[%=o.formatFileSize(file.size)%]</p>
-            [% if (!o.files.error) { %]
+        <td class="preview"><span class="fade"></span></td>
+        <td class="name"><span>[%=file.name%]</span></td>
+        <td class="size"><span>[%=o.formatFileSize(file.size)%]</span></td>
+        [% if (file.error) { %]
+            <td class="error" colspan="2">Error [%=file.error%]</td>
+        [% } else if (o.files.valid && !i) { %]
+            <td>
                 <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
-            [% } %]
-        </td>
-        <td>
-            [% if (!o.files.error && !i && !o.options.autoUpload) { %]
-                <button class="btn btn-small btn-primary start">
-                    <i class="icon-upload icon-white"></i>
-                    <span>{% trans "Start" %}</span>
-                </button>
-            [% } %]
-            [% if (!i) { %]
-            <button class="btn btn-small btn-warning cancel">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>{% trans "Cancel" %}</span>
-            </button>
-            [% } %]
-        </td>
+            </td>
+            <td>[% if (!o.options.autoUpload) { %]
+                <button class="start">Start</button>
+            [% } %]</td>
+        [% } else { %]
+            <td colspan="2"></td>
+        [% } %]
+        <td>[% if (!i) { %]
+            <button class="cancel">Cancel</button>
+        [% } %]</td>
     </tr>
 [% } %]
 </script>
@@ -90,29 +75,23 @@
 <script id="template-download" type="text/x-tmpl">
 [% for (var i=0, file; file=o.files[i]; i++) { %]
     <tr class="template-download fade">
+        [% if (file.error) { %]
+            <td></td>
+            <td class="name"><span>[%=file.name%]</span></td>
+            <td class="size"><span>[%=o.formatFileSize(file.size)%]</span></td>
+            <td class="error" colspan="2">>Error [%=file.error%]</td>
+        [% } else { %]
+            <td class="preview">[% if (file.thumbnail_url) { %]
+                <a href="[%=file.url%]" title="[%=file.name%]" data-gallery="gallery" download="[%=file.name%]"><img src="[%=file.thumbnail_url%]"></a>
+            [% } %]</td>
+            <td class="name">
+                <a href="[%=file.url%]" title="[%=file.name%]" data-gallery="[%=file.thumbnail_url&&'gallery'%]" download="[%=file.name%]">[%=file.name%]</a>
+            </td>
+            <td class="size"><span>[%=o.formatFileSize(file.size)%]</span></td>
+            <td colspan="2"></td>
+        [% } %]
         <td>
-            <span class="preview">
-                [% if (file.thumbnail_url) { %]
-                    <a href="[%=file.url%]" title="[%=file.name%]" class="gallery" download="[%=file.name%]"><img src="[%=file.thumbnail_url%]"></a>
-                [% } %]
-            </span>
-        </td>
-        <td>
-            <p class="name">
-                <a href="[%=file.url%]" title="[%=file.name%]" class="[%=file.thumbnail_url?'gallery':''%]" download="[%=file.name%]">[%=file.name%]</a>
-            </p>
-            [% if (file.error) { %]
-                <div><span class="label label-important">Error</span> [%=file.error%]</div>
-            [% } %]
-        </td>
-        <td>
-            <span class="size">[%=o.formatFileSize(file.size)%]</span>
-        </td>
-        <td>
-            <button class="btn btn-danger delete" data-type="[%=file.delete_type%]" data-url="[%=file.delete_url%]"[% if (file.delete_with_credentials) { %] data-xhr-fields='{"withCredentials":true}'[% } %]>
-                <i class="icon-trash icon-white"></i>
-                <span>Delete</span>
-            </button>
+            <button class="delete" data-type="[%=file.delete_type%]" data-url="[%=file.delete_url%]"[% if (file.delete_with_credentials) { %] data-xhr-fields='{"withCredentials":true}'[% } %]>Delete</button>
             <input type="checkbox" name="delete" value="1" class="toggle">
             <!-- Fields to work properly with the uploader -->
             <input type="hidden" name="jquery_uploads" value="[%=file.url%]">
@@ -124,7 +103,7 @@
 
 
 <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
-<script src="{% get_static_prefix %}jquery_uploader/js/vendor/jquery.ui.widget.min.js"></script>
+<!-- <script src="{% get_static_prefix %}jquery_uploader/js/vendor/jquery.ui.widget.min.js"></script> -->
 <!-- The Templates plugin is included to render the upload/download listings -->
 <script src="{% get_static_prefix %}jquery_uploader/js/tmpl.min.js"></script>
 <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
@@ -147,6 +126,8 @@
 <script src="{% get_static_prefix %}jquery_uploader/js/jquery.fileupload-validate.min.js"></script>
 <!-- The File Upload user interface plugin -->
 <script src="{% get_static_prefix %}jquery_uploader/js/jquery.fileupload-ui.min.js"></script>
+<!-- The File Upload jQuery UI plugin -->
+<script src="{% get_static_prefix %}jquery_uploader/js/jquery.fileupload-jui.min.js"></script>
 
 <!-- The main application script -->
 <script>
@@ -161,12 +142,11 @@ $(function () {
     tmpl.regexp = /([\s'\\])(?![^%]*%\])|(?:\[%(=|#)([\s\S]+?)%\])|(\[%)|(%\])/g;
 
     // Initialize the jQuery File Upload widget:
+    // Uncomment the following to send cross-domain cookies:
     $("#fileupload").fileupload({
         maxFileSize: {{ max_file_size }},
         previewMaxHeight: {{ preview_max_height }},
         previewMaxWidth: {{ preview_max_width }},
-
-        // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
     });
 
@@ -174,6 +154,4 @@ $(function () {
 </script>
 
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
-<!--[if gte IE 8]>
-<script src="{% get_static_prefix %}jquery_uploader/js/cors/jquery.xdr-transport.js"></script>
-<![endif]-->
+<!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->

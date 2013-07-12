@@ -1,5 +1,71 @@
-Yet another plugin for uploading files to the server using Django and JQuery.
+Yet another plugin for uploading files to the server using
+Django and JQuery.
 
-Based on jQuery-File-Upload written by Sebastian Tschan (https://github.com/blueimp/jQuery-File-Upload).
+Based on jQuery-File-Upload written by Sebastian Tschan
+(https://github.com/blueimp/jQuery-File-Upload).
 
-The project is still in its infancy.
+
+Requirements
+
+    - PIL (Python Imaging Library) for thumbnails generation
+    - Django 1.4 +
+
+
+Installation
+
+1. Add app to your INSTALLED_APPS:
+    INSTALLED_APPS = (
+        ...
+        'jquery_uploader',
+        ...
+    )
+
+
+2. Register urls in your root urls.py:
+    urlpatterns = patterns('',
+        ...
+        url(r'^jquery_uploader/', include('jquery_uploader.urls')),
+        ...
+    )
+
+
+3. If necessary, you must configure the directory for temporary storage
+of uploaded files and link to it, and also the size of created thumbnails:
+    # by default
+    JQUERY_UPLOADER_ROOT = 'jquery_uploader'
+    JQUERY_UPLOADER_URL = 'jquery_uploader'
+    JQUERY_UPLOADER_PREVIEW_MAX_HEIGHT = 140
+    JQUERY_UPLOADER_PREVIEW_MAX_WIDTH = 200
+    JQUERY_UPLOADER_MAX_FILE_SIZE = 10485760
+
+
+4. Simple example use in the project:
+
+4.1. In template:
+    <form action="/your-url-for-upload-and-save/" method="POST">
+        {% csrf_token %}
+        {% load jquery_uploader_tags %}
+        {% jquery_uploader_simple %}
+        {# or for JQuery UI {% jquery_uploader_jqueryui %} #}
+        {# or for Bootstrap {% jquery_uploader_bootstrap %} #}
+        <input type="submit" />
+    </form>
+
+    Also, for certain cases, you can specify a maximum file size with the templatetag argument:
+
+    {% jquery_uploader_simple 1048576 %}
+
+4.2. In model and in views (downloaded files are returned by variable 'jquery_uploader_files'):
+    # model
+    class Photo(models.Model):
+        photo = models.ImageField(upload_to='photo')
+
+    # view
+    from jquery_uploader.utils import save_to_model
+
+    if request.method == 'POST':
+        files = request.POST.getlist('jquery_uploader_files', None)
+        for f in files:
+            p = Photo()
+            save_to_model(p.photo, f)
+            p.save()
