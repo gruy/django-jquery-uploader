@@ -59,7 +59,7 @@
         <td class="name">
             [%=file.name%]
             [% if (file.error) { %]
-                <div><span class="label label-important">Error</span> [%=file.error%]</div>
+                <div><span class="label label-important">{% trans 'Error' %}</span> [%=file.error%]</div>
             [% } %]
         </td>
         <td class="size">
@@ -103,7 +103,7 @@
                 <a href="[%=file.url%]" title="[%=file.name%]" class="[%=file.thumbnail_url?'gallery':''%]" download="[%=file.name%]">[%=file.name%]</a>
             </p>
             [% if (file.error) { %]
-                <div><span class="label label-important">Error</span> [%=file.error%]</div>
+                <div><span class="label label-important">{% trans 'Error' %}</span> [%=file.error%]</div>
             [% } %]
         </td>
         <td>

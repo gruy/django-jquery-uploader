@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import magic
 import os
 from PIL import Image
 
@@ -13,23 +14,29 @@ def thumb_name(full_name):
     """ Generate thumb file name """
     file_name = os.path.basename(full_name)
     name, ext = os.path.splitext(file_name)
-    thumb = '%s_t%s' % (name, ext)
+    thumb = '%s_t.jpeg' % name
     return thumb
 
 
 def get_thumb(full_name):
     """ Generate and save thumbnail. Return thumbnail url """
 
+    thumb_url = None
     thumb = thumb_name(full_name)
     thumb_full = os.path.join(uploader_root, thumb)
 
-    if not os.path.exists(thumb_full):
-        im = Image.open(full_name)
-        thumb_image = im.copy()
-        thumb_image.thumbnail(uploader_size, Image.ANTIALIAS)
-        thumb_image.save(thumb_full, 'JPEG', quality=90)
+    mimes_images = ('image/png', 'image/jpeg', 'image/pjpeg', 'image/gif', 'image/x-ms-bmp', 'image/bmp', 'image/vnd.microsoft.icon')
+    mime = magic.from_file(full_name, mime=True)
+    if mime in mimes_images:
+        if not os.path.exists(thumb_full):
+            im = Image.open(full_name)
+            thumb_image = im.copy()
+            if thumb_image.mode != 'RGB':
+                thumb_image = thumb_image.convert('RGB')
+            thumb_image.thumbnail(uploader_size, Image.ANTIALIAS)
+            thumb_image.save(thumb_full, 'JPEG', quality=80)
 
-    thumb_url = os.path.join(uploader_url, thumb)
+        thumb_url = os.path.join(uploader_url, thumb)
 
     return thumb_url
 
